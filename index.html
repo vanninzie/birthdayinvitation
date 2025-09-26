@@ -1,146 +1,429 @@
-import React, { useState, useRef } from "react";
-
-const COLLAGE = [
-  "/uploads/6ead0cebb17cabc8d0b9018066b38dbc.jpg",
-  "/uploads/337fa800d6fa89ed1fc97d9a817610e8.jpg",
-  "/uploads/0712eeab4ae5d386285a477645af83d5.jpg",
-];
-
-const MUSIC_URL = "/audio/party-mix.mp3";
-
-export default function Wildflower35() {
-  const [playing, setPlaying] = useState(false);
-  const audioRef = useRef(null);
-  const [rsvp, setRsvp] = useState({ name: "", coming: "yes", note: "" });
-  const [submitted, setSubmitted] = useState(false);
-
-  function togglePlay() {
-    if (!audioRef.current) return;
-    if (playing) {
-      audioRef.current.pause();
-      setPlaying(false);
-    } else {
-      audioRef.current.play();
-      setPlaying(true);
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>You're Invited — Wild Prints Party</title>
+  <meta name="description" content="Join me for a night of dancing, music and memories — Dress: Sexy with Wild Prints" />
+  <style>
+    /* --------- Reset & base --------- */
+    :root{
+      --accent:#ff3ca6;
+      --accent2:#ffb86b;
+      --bg:#0b0210;
+      --glass: rgba(255,255,255,0.06);
+      --glass-2: rgba(255,255,255,0.03);
+      --card-radius:18px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      color-scheme: dark;
     }
-  }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:#fff}
+    a{color:inherit}
 
-  function handleRsvpChange(e) {
-    setRsvp({ ...rsvp, [e.target.name]: e.target.value });
-  }
+    /* --------- Full-screen layout --------- */
+    .wrap{min-height:100vh;display:grid;grid-template-columns:1fr;grid-template-rows:1fr;}
 
-  function submitRsvp(e) {
-    e.preventDefault();
-    console.log("RSVP submitted", rsvp);
-    setSubmitted(true);
-  }
+    /* --------- Motion background (gradient + animated shapes) --------- */
+    .bg{
+      position:fixed;inset:0;z-index:-2;overflow:hidden;
+      background: radial-gradient(ellipse at 10% 20%, rgba(255,60,166,0.12), transparent 8%),
+                  radial-gradient(ellipse at 85% 80%, rgba(255,184,107,0.08), transparent 10%),
+                  linear-gradient(135deg,#050009 0%, #17001a 40%, #2a001b 100%);
+    }
+    .blob{
+      position:absolute;filter:blur(30px);opacity:0.85;mix-blend-mode:screen;animation:float 18s ease-in-out infinite;
+      border-radius:50%;
+    }
+    .blob.b1{width:580px;height:580px;background:linear-gradient(45deg,var(--accent),#b34adb);left:-10%;top:-5%;--d:0s}
+    .blob.b2{width:420px;height:420px;background:linear-gradient(45deg,var(--accent2),#ffd36b);right:-8%;bottom:-6%;animation-duration:22s}
+    .blob.b3{width:260px;height:260px;background:linear-gradient(45deg,#5ef3ff,#6a68ff);left:20%;bottom:-8%;animation-duration:20s}
+    @keyframes float{0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-40px) rotate(15deg)}100%{transform:translateY(0) rotate(0deg)}}
 
-  return (
-    <div className="min-h-screen text-gray-900 font-sans relative overflow-hidden">
-      {/* Overlapping collage background */}
-      <div className="absolute inset-0">
-        {COLLAGE.map((img, i) => (
-          <div
-            key={i}
-            className="absolute w-2/3 h-2/3 bg-cover bg-center rounded-xl shadow-lg"
-            style={{
-              backgroundImage: `url(${img})`,
-              top: `${10 + i * 15}%`,
-              left: `${10 + i * 10}%`,
-              transform: `rotate(${i % 2 === 0 ? "-5deg" : "8deg"})`,
-              zIndex: i,
-            }}
-          />
-        ))}
-      </div>
+    /* subtle zebra-like animated pattern for "wild prints" vibe */
+    .pattern{position:fixed;inset:0;z-index:-1;opacity:0.06;background-image:repeating-linear-gradient(120deg, rgba(255,255,255,0.06) 0 6px, transparent 6px 16px);mix-blend-mode:overlay;}
 
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
+    /* --------- Main card --------- */
+    .container{max-width:1100px;margin:40px auto;padding:28px;display:grid;grid-template-columns:1fr 420px;gap:28px;align-items:start}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--card-radius);backdrop-filter: blur(6px);padding:26px;border:1px solid var(--glass)}
 
-      <div className="relative z-10">
-        <audio ref={audioRef} src={MUSIC_URL} loop preload="none" />
+    /* hero */
+    .hero{padding:36px;border-radius:14px;display:flex;flex-direction:column;gap:12px}
+    h1{font-size:36px;margin:0;letter-spacing:-0.5px}
+    p.lead{margin:0;color:#e9d7e8}
 
-        <header className="p-6 flex items-center justify-between">
-          <h1 className="text-3xl md:text-4xl font-extrabold">Wildflower 35 — You're invited</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={togglePlay}
-              className="px-4 py-2 rounded-full bg-amber-400 hover:scale-105 transform transition"
-            >
-              {playing ? "Pause Music" : "Play Music"}
-            </button>
+    .cta-row{display:flex;gap:12px;align-items:center;margin-top:12px}
+    .btn{padding:12px 16px;border-radius:12px;border:none;cursor:pointer;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent2));color:#10040a;box-shadow:0 6px 20px rgba(255,60,166,0.12)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff}
+
+    /* RSVP form */
+    form .row{display:flex;gap:8px;margin-top:10px}
+    input,textarea,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--glass-2);background:transparent;color:#fff}
+    label{font-size:13px;color:#cfc6d4}
+
+    /* guestbook list */
+    .messages{max-height:360px;overflow:auto;padding:8px;display:grid;gap:10px}
+    .msg{padding:10px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.02)}
+    .meta{font-size:12px;color:#c9b8c5}
+
+    /* small right column */
+    .side{position:sticky;top:40px;display:flex;flex-direction:column;gap:16px}
+    .count{font-size:48px;font-weight:700}
+
+    /* countdown */
+    .countdown{display:flex;gap:8px}
+    .countdown > div{padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);min-width:64px;text-align:center}
+
+    /* music player overlay */
+    .player{display:flex;gap:8px;align-items:center}
+    .play-btn{width:48px;height:48px;border-radius:12px;border:1px solid rgba(255,255,255,0.06);display:grid;place-items:center;cursor:pointer}
+
+    /* responsive */
+    @media (max-width:980px){.container{grid-template-columns:1fr;padding:18px}.side{position:relative;top:0}}
+
+  </style>
+</head>
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
+  <div class="pattern" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <main class="container">
+      <section class="card hero">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+          <div>
+            <h1>You're Invited — Wild Prints Party</h1>
+            <p class="lead">Come celebrate with me: dancing, music, and memories. Dress: <strong>Sexy with Wild Prints</strong> 🐆</p>
           </div>
-        </header>
+          <div style="text-align:right">
+            <div class="count">Tonight</div>
+            <div style="font-size:13px;color:#d4c3d6">[Date & Time]</div>
+          </div>
+        </div>
 
-        <section className="mx-auto max-w-5xl p-6 md:p-12 flex flex-col md:flex-row items-center gap-8">
-          <div className="flex-1">
-            <div className="rounded-2xl shadow-lg overflow-hidden">
-              <div
-                className="relative h-64 md:h-96 bg-cover bg-center"
-                style={{ backgroundImage: `url(${COLLAGE[0]})` }}
-              >
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                  <div className="text-center text-white p-6">
-                    <h2 className="text-3xl md:text-5xl font-bold">35 Years of Blooming</h2>
-                    <p className="mt-2">Join me to celebrate — wild prints, bright hearts, unforgettable night.</p>
-                    <p className="mt-4 italic">Dress code: Wildflower prints & bold patterns</p>
-                  </div>
-                </div>
-              </div>
+        <div style="display:flex;gap:14px;margin-top:16px;align-items:center">
+          <div class="player">
+            <div class="play-btn" id="playBtn" title="Play party music">▶</div>
+            <div style="font-size:13px;color:#f1dff1">Party Playlist</div>
+          </div>
+
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="btn btn-primary" id="rsvpScroll">RSVP Now</button>
+            <a class="btn btn-ghost" href="#guestbook">Leave a memory</a>
+          </div>
+        </div>
+
+        <div style="margin-top:18px;display:flex;gap:12px;align-items:center">
+          <div style="padding:8px;border-radius:10px;background:rgba(0,0,0,0.25);font-size:13px">Dress Code</div>
+          <div style="font-size:13px;color:#f4e7f4">Sexy + Wild Prints — animal prints, bold patterns, shiny textures. Be daring!</div>
+        </div>
+
+        <div style="margin-top:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <!-- Example look tiles (replace images as you like) -->
+          <div style="border-radius:10px;min-height:80px;background:linear-gradient(45deg,#3b0b2f,#7b2144);display:flex;align-items:center;justify-content:center">Leopard Luxe</div>
+          <div style="border-radius:10px;min-height:80px;background:linear-gradient(45deg,#3b2b12,#7b5b23);display:flex;align-items:center;justify-content:center">Snake Glam</div>
+          <div style="border-radius:10px;min-height:80px;background:linear-gradient(45deg,#0b2740,#1c6a9b);display:flex;align-items:center;justify-content:center">Tropical Wild</div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:13px;color:#cdbfd0">Attending</div>
+              <div id="attendingCount" class="count">0</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:13px;color:#cdbfd0">Venue</div>
+              <div style="font-weight:600">[Private — will share after RSVP]</div>
             </div>
           </div>
 
-          <aside className="w-full md:w-96 p-4 rounded-xl bg-white/70 backdrop-blur-sm shadow">
-            <h3 className="font-semibold text-lg">Party Details</h3>
-            <p className="mt-2">Date: <strong>April 10, 2026</strong></p>
-            <p>Time: <strong>7:00pm</strong></p>
-            <p>Location: Bed-Stuy, Brooklyn — exact address provided to guests</p>
+          <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:12px 0">
 
-            <form onSubmit={submitRsvp} className="mt-4 flex flex-col gap-2">
-              <input
-                name="name"
-                value={rsvp.name}
-                onChange={handleRsvpChange}
-                placeholder="Your name"
-                className="p-2 rounded"
-                required
-              />
-              <select
-                name="coming"
-                value={rsvp.coming}
-                onChange={handleRsvpChange}
-                className="p-2 rounded"
-              >
-                <option value="yes">Yes — I’ll be there</option>
-                <option value="no">No — Send photos!</option>
-                <option value="maybe">Maybe</option>
-              </select>
-              <textarea
-                name="note"
-                value={rsvp.note}
-                onChange={handleRsvpChange}
-                placeholder="A note for the host (optional)"
-                className="p-2 rounded"
-              />
-              <button type="submit" className="mt-2 px-4 py-2 bg-pink-500 rounded text-white">
-                Send RSVP
-              </button>
-              {submitted && <p className="text-sm text-green-700">Thanks — RSVP received!</p>}
-            </form>
-          </aside>
-        </section>
+          <div>
+            <div style="font-size:13px;color:#cdbfd0;margin-bottom:8px">Countdown</div>
+            <div class="countdown" id="countdown">
+              <div><div id="d">0</div><div style="font-size:12px;color:#d6c6d9">days</div></div>
+              <div><div id="h">0</div><div style="font-size:12px;color:#d6c6d9">hrs</div></div>
+              <div><div id="m">0</div><div style="font-size:12px;color:#d6c6d9">mins</div></div>
+              <div><div id="s">0</div><div style="font-size:12px;color:#d6c6d9">secs</div></div>
+            </div>
+          </div>
+        </div>
 
-        <section className="max-w-6xl mx-auto p-6">
-          <h2 className="text-2xl font-bold mb-4">Leave a Memory</h2>
-          <p className="mb-4">Guests can leave a quick message—this could be saved via your backend or emailed to you.</p>
-          <form className="flex flex-col gap-2">
-            <input placeholder="Your name" className="p-2 rounded" />
-            <textarea placeholder="A short memory or wish" className="p-2 rounded" />
-            <button className="mt-2 px-4 py-2 bg-emerald-500 rounded text-white">Post Message</button>
-          </form>
-        </section>
+        <div class="card">
+          <div style="font-size:13px;color:#cdbfd0;margin-bottom:8px">Quick invite text</div>
+          <div style="font-size:14px">"Join me for a night of dancing, bold prints, and unforgettable memories — RSVP & leave a memory!"</div>
+        </div>
 
-        <footer className="p-6 text-center text-sm text-gray-600">Designed with love • Wildflower 35</footer>
-      </div>
-    </div>
-  );
-}
+        <div class="card">
+          <div style="font-size:13px;color:#cdbfd0;margin-bottom:8px">Share</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="navigator.share && navigator.share({title:'Party invite',text:'Join me — sexy wild prints party',url:location.href})">Share</button>
+            <button class="btn btn-ghost" onclick="copyLink()">Copy Link</button>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- RSVP + Guestbook Column -->
+      <section class="card" style="grid-column:1 / -1" id="rsvpArea">
+        <h2 style="margin:0 0 8px 0">RSVP</h2>
+        <p style="margin:0 0 12px 0;color:#d7cbe0">Let me know if you're coming — and leave a memory so I can read it at the party!</p>
+
+        <!-- RSVP form: by default posts to Formspree. Replace the action URL with your Formspree endpoint or another form handler. -->
+        <form id="rsvpForm" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST">
+          <div style="display:grid;grid-template-columns:1fr 160px;gap:8px">
+            <div>
+              <label for="name">Your name</label>
+              <input id="name" name="name" required placeholder="Full name">
+            </div>
+            <div>
+              <label for="guests"># Guests</label>
+              <input id="guests" name="guests" type="number" min="0" value="0">
+            </div>
+          </div>
+
+          <div style="margin-top:10px">
+            <label for="coming">Will you come?</label>
+            <select id="coming" name="coming">
+              <option value="yes">Yes — can't wait!</option>
+              <option value="maybe">Maybe</option>
+              <option value="no">No, but send pics</option>
+            </select>
+          </div>
+
+          <div style="margin-top:10px">
+            <label for="note">Message to the host (optional)</label>
+            <textarea id="note" name="note" rows="3" placeholder="Leave a quick note or request"></textarea>
+          </div>
+
+          <div style="margin-top:12px;display:flex;gap:8px;align-items:center">
+            <button class="btn btn-primary" type="submit">Submit RSVP</button>
+            <div style="font-size:13px;color:#d7cbe0">We keep the venue private until you RSVP.</div>
+          </div>
+        </form>
+
+        <hr style="border:none;height:1px;background:rgba(255,255,255,0.02);margin:18px 0">
+
+        <h3 id="guestbook" style="margin-top:0">Guestbook — memories</h3>
+        <p style="margin:0 0 10px 0;color:#d7cbe0">Write a memory, a toast, or a song request. Messages are public on this page.</p>
+
+        <!-- Guestbook input -->
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:12px">
+          <input id="gName" placeholder="Your name (or nickname)" style="padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#fff">
+          <textarea id="gText" placeholder="Write a memory or a toast..." rows="2" style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:#fff"></textarea>
+          <button class="btn btn-primary" id="leaveMsg">Leave memory</button>
+        </div>
+
+        <div class="messages" id="messagesList">
+          <!-- Messages will appear here -->
+        </div>
+
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Invisible audio element: start/pause controlled by the play button. Replace src with your hosted mp3 or an approved streaming embed. -->
+  <audio id="partyAudio" loop preload="auto">
+    <source src="./assets/party-loop.mp3" type="audio/mpeg">
+    <!-- Replace the source above with a real mp3 file or a streaming source. GitHub Pages can host the mp3 in the repo's assets folder. -->
+  </audio>
+
+  <script>
+    // ---------- Quick helper UI behaviors ----------
+    const playBtn = document.getElementById('playBtn');
+    const audio = document.getElementById('partyAudio');
+    let playing = false;
+    playBtn.addEventListener('click', async ()=>{
+      try{
+        if(!playing){
+          await audio.play();
+          playBtn.textContent = '▌▌';
+          playing = true;
+        } else {
+          audio.pause();
+          playBtn.textContent = '▶';
+          playing = false;
+        }
+      }catch(e){
+        // autoplay policies — if blocked, change button to "Open Playlist" or similar.
+        alert('Playback failed. Please allow autoplay or click the audio controls.');
+      }
+    });
+
+    function copyLink(){navigator.clipboard.writeText(location.href).then(()=>alert('Link copied!'))}
+
+    // Smooth scroll to RSVP
+    document.getElementById('rsvpScroll').addEventListener('click',()=>{document.getElementById('rsvpArea').scrollIntoView({behavior:'smooth'})});
+
+    // Countdown (set your party date here)
+    const eventDate = new Date('2025-12-31T21:00:00'); // <-- REPLACE with your event date & time (ISO format)
+    function updateCountdown(){
+      const now = new Date();
+      const diff = Math.max(0,eventDate - now);
+      const s = Math.floor(diff/1000)%60;
+      const m = Math.floor(diff/1000/60)%60;
+      const h = Math.floor(diff/1000/60/60)%24;
+      const d = Math.floor(diff/1000/60/60/24);
+      document.getElementById('d').textContent = d;
+      document.getElementById('h').textContent = h;
+      document.getElementById('m').textContent = m;
+      document.getElementById('s').textContent = s;
+    }
+    setInterval(updateCountdown,1000);updateCountdown();
+
+    // ---------- Guestbook & RSVP storage ----------
+    // This template uses Firebase Realtime Database for live storage. To enable:
+    // 1) Create a Firebase project at https://console.firebase.google.com
+    // 2) Add a Web app and copy the firebaseConfig below
+    // 3) In Database > Realtime Database create a database and set rules appropriate for your use
+    // 4) Replace firebaseConfig placeholders below and the DB path if desired
+
+    // If you don't want to use Firebase, you can: 
+    // - Use Formspree for RSVP (action attribute in the RSVP form) and keep the guestbook local (localStorage)
+    // - Or replace with your preferred backend/API
+
+    // ----- Firebase CONFIG (REPLACE with your project's config) -----
+    const firebaseConfig = {
+      apiKey: "REPLACE_API_KEY",
+      authDomain: "REPLACE_AUTH_DOMAIN",
+      databaseURL: "REPLACE_DATABASE_URL",
+      projectId: "REPLACE_PROJECT_ID",
+      storageBucket: "REPLACE_STORAGE_BUCKET",
+      messagingSenderId: "REPLACE_MSG_SENDER",
+      appId: "REPLACE_APP_ID"
+    };
+
+    // For demos, if firebaseConfig.apiKey remains "REPLACE_API_KEY", the script will fall back to localStorage-only.
+
+    // ---------- Minimal guestbook implementation w/ optional Firebase ----------
+    const messagesList = document.getElementById('messagesList');
+    const leaveBtn = document.getElementById('leaveMsg');
+    const gName = document.getElementById('gName');
+    const gText = document.getElementById('gText');
+    const attendingCount = document.getElementById('attendingCount');
+
+    // local array backup
+    let messages = [];
+
+    function renderMessages(){
+      messagesList.innerHTML = messages.slice().reverse().map(m=>`
+        <div class="msg"><div style="font-weight:700">${escapeHtml(m.name||'Anonymous')}</div>
+        <div class="meta">${new Date(m.time).toLocaleString()}</div>
+        <div style="margin-top:6px">${escapeHtml(m.text)}</div></div>
+      `).join('');
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g,tag=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[tag]))}
+
+    // Load saved messages from localStorage fallback
+    function loadLocal(){try{const raw=localStorage.getItem('party_msgs');if(raw) messages = JSON.parse(raw);}catch(e){messages=[]}renderMessages()}
+    function saveLocal(){localStorage.setItem('party_msgs',JSON.stringify(messages))}
+
+    // When user leaves message: save locally and optionally push to Firebase
+    leaveBtn.addEventListener('click',()=>{
+      const name = gName.value.trim()||'Anonymous';
+      const text = gText.value.trim();
+      if(!text) return alert('Write a memory before submitting.');
+      const entry = {name,text,time:Date.now()};
+      messages.push(entry); saveLocal(); renderMessages(); gName.value='';gText.value='';
+      // If firebase enabled, push it there as well (see further down)
+      if(window.dbPush) window.dbPush(entry);
+    });
+
+    loadLocal();
+
+    // ---------- Firebase optional hookup (attempt dynamic load) ----------
+    (function tryFirebase(){
+      if(firebaseConfig.apiKey === 'REPLACE_API_KEY'){
+        // no config set — skip
+        console.warn('Firebase config not provided; guestbook will use localStorage only.');
+        updateAttendingCount();
+        return;
+      }
+      // load firebase scripts dynamically
+      const s1 = document.createElement('script'); s1.src='https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js';
+      const s2 = document.createElement('script'); s2.src='https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js';
+      s2.onload = ()=>{
+        try{
+          const app = firebase.initializeApp(firebaseConfig);
+          const db = firebase.database();
+          const ref = db.ref('party_guestbook/messages');
+          // read existing
+          ref.limitToLast(200).on('value', snapshot => {
+            const val = snapshot.val() || {};
+            messages = Object.values(val || {});
+            saveLocal(); renderMessages(); updateAttendingCountFromDb();
+          });
+          // exposed push function
+          window.dbPush = (entry) => { ref.push(entry); }
+          // RSVP counts in DB (optional)
+          window.dbRefForRsvps = db.ref('party_guestbook/rsvps');
+        }catch(e){console.error('Firebase init failed',e);updateAttendingCount();}
+      };
+      document.head.appendChild(s1);document.head.appendChild(s2);
+    })();
+
+    // ---------- RSVP form behavior (local counter + optional firebase increment) ----------
+    document.getElementById('rsvpForm').addEventListener('submit', (e)=>{
+      // allow default submission to Formspree while also updating local counter
+      try{
+        const name = document.getElementById('name').value || 'Guest';
+        const coming = document.getElementById('coming').value;
+        const guests = parseInt(document.getElementById('guests').value)||0;
+        if(coming === 'yes') incrementLocalCount(1+guests);
+        // if firebase ref available, increment there too
+        if(window.dbRefForRsvps){
+          const r = window.dbRefForRsvps.push({name,coming,guests,time:Date.now()});
+        }
+      }catch(e){console.error(e)}
+      // show inline thank-you — Formspree will redirect or show success depending on form setup
+      setTimeout(()=>{
+        alert('Thanks — your RSVP was submitted!');
+      },200);
+    });
+
+    // local attending counter stored in localStorage
+    function incrementLocalCount(n=1){
+      const raw = localStorage.getItem('party_attending');
+      let cur = raw?parseInt(raw):0; cur = cur + (n||0); localStorage.setItem('party_attending',cur); updateAttendingCount();
+      // if firebase supported, also push an entry (see dbRefForRsvps above)
+      if(window.dbRefForRsvps) window.dbRefForRsvps.push({delta:n,time:Date.now()});
+    }
+    function updateAttendingCount(){const raw = localStorage.getItem('party_attending');attendingCount.textContent = raw?raw:0}
+
+    // try to compute attending count from firebase (if available)
+    function updateAttendingCountFromDb(){
+      if(!window.dbRefForRsvps) return updateAttendingCount();
+      window.dbRefForRsvps.once('value').then(snap=>{
+        const val = snap.val()||{}; let total=0; Object.values(val).forEach(x=>{ if(x.guests!=null) total += (parseInt(x.guests)||0) + (x.coming==='yes'?1:0); if(x.delta) total += (parseInt(x.delta)||0)});
+        attendingCount.textContent = total; localStorage.setItem('party_attending',total);
+      }).catch(()=>updateAttendingCount());
+    }
+
+    // initial attending
+    updateAttendingCount();
+
+    // End of script
+  </script>
+
+  <!-- Helpful comments for deployment: 
+    - Save this file as index.html at the root of a GitHub repo (e.g. `party-invite`).
+    - Create a folder `assets/` and put `party-loop.mp3` or replace audio src with your streaming URL.
+    - (Optional) Set up Formspree and replace the RSVP form action with your Formspree endpoint.
+    - (Optional) For a live guestbook & RSVP counts, create a Firebase project and replace firebaseConfig values.
+    - On GitHub: push the repo, go to Settings → Pages and publish main branch (or gh-pages). Your site will be at `https://<username>.github.io/<repo-name>/`.
+
+    Enjoy — open an issue in your repo if you want me to customize visuals, add animations, or set up Firebase rules & a minimal README for connecting services.
+  -->
+
+</body>
+</html>
